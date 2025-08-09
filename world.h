@@ -1,8 +1,6 @@
 #ifndef WORLD
 #define WORLD
 
-#include "particle.h"
-#include <vector>
 #include <Eigen/Dense>
 
 using namespace Eigen;
@@ -25,7 +23,7 @@ class World
         // Calculates the 30 required independent Christoffel symbols using central difference numerical derivatives.
         // Returns an array of 4 Eigen::Matrix4d objects, one for each coordinate of the upper index.
         // TODO: Use GiNaC or something to do this symbolically using the form of the metric.
-        std::vector<Matrix4d> getChristoffelSymbols(Vector4d &x);
+        std::vector<Matrix4d> getChristoffelSymbols(Vector4d x, Matrix4d &metric);
 };
 
 #endif

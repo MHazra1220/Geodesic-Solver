@@ -20,3 +20,9 @@ void Particle::updateMetric(Matrix4d new_metric)
 {
     metric = new_metric;
 }
+
+// Advances the ray path by a parameter step, dl.
+void Particle::advance(double &dl)
+{
+    // TODO: Actually write the damn function.
+}
