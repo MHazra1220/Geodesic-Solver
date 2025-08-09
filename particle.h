@@ -21,11 +21,9 @@ class Particle
         // Metric tensor at the particle's coordinates, assumed to be symmetric (torsion-free).
         Matrix4d metric;
 
+        void setX(Vector4d new_x);
+        void setV(Vector4d new_v);
         void updateMetric(Matrix4d new_metric);
-        // Set the particle to be either time-like (massive) or null (light-like).
-        // TODO: Write these functions, probably by encoding to an enum parameter of Particle.
-        void setTimeLike();
-        void setNull();
         // Advances the simulation using RK4 by a parameter step, dl.
         // TODO: Consider other, potentially more stable ODE integrators, e.g. a symplectic integrator.
         void advance(double &dl);

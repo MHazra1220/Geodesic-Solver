@@ -4,13 +4,28 @@
 
 using namespace Eigen;
 
-// Currently returns the metric of a Schwarzschild black hole with a mass of one million solar masses.
+// Currently returns the metric of a Schwarzschild black hole with a Schwarzschild radius of 1 (normalised units).
 Matrix4d World::getMetricTensor(Vector4d &x)
 {
-    double M = 1e6 * 1.989e30;
+    double r_s = 1.;
+    double r = x(seq(1, 3)).dot(x(seq(1, 3)));
+    double r_squared = r*r;
+    double mult_factor = r_s / (r_squared * (r - r_s));
     Matrix4d metric;
     metric.setIdentity();
-    metric(0, 0) = -1.;
+    metric(0, 0) = -1. + r_s/r;
+    metric(1, 1) += x(1)*x(1);
+    metric(2, 2) += x(2)*x(2);
+    metric(3, 3) += x(3)*x(3);
+    metric(1, 2) = x(1)*x(2);
+    metric(2, 1) = metric(1, 2);
+    metric(1, 3) = x(1)*x(3);
+    metric(3, 1) = metric(1, 3);
+    metric(2, 3) = x(2)*x(3);
+    metric(3, 2) = metric(2, 3);
+    metric *= mult_factor;
+    metric(0, 0) /= mult_factor;
+
     return metric;
 }
 

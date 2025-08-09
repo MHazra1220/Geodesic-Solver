@@ -13,7 +13,7 @@ using namespace Eigen;
  *  in terms of just (t, x, y, z).
  */
 
-// World is the simulation object as a whole and contains the metric and all the particles.
+// World is the internal simulation object and contains the metric and all the rays.
 class World
 {
     public:
@@ -22,7 +22,7 @@ class World
         // Function to retrieve the metric tensor at x.
         // TODO: For now, this function is user-defined.
         Matrix4d getMetricTensor(Vector4d &x);
-        // Calculates the 40 independent Christoffel symbols using central difference numerical derivatives.
+        // Calculates the 30 required independent Christoffel symbols using central difference numerical derivatives.
         // Returns an array of 4 Eigen::Matrix4d objects, one for each coordinate of the upper index.
         // TODO: Use GiNaC or something to do this symbolically using the form of the metric.
         std::vector<Matrix4d> getChristoffelSymbols(Vector4d &x);
