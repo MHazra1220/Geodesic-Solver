@@ -15,12 +15,15 @@ using namespace Eigen;
 class World
 {
     public:
-        int num_particles { 0 };
+        // Render resolution; 1440p widescreen by default.
+        int res_width { 2560 };
+        int res_height { 1440 };
+        // Horizontal FOV in degrees.
+        double fov { 10. };
 
-        // Function to retrieve the metric tensor at x.
-        // TODO: For now, this function is user-defined.
-        Matrix4d getMetricTensor(Vector4d &x);
-        // Calculates the 30 required independent Christoffel symbols using central difference numerical derivatives.
+        // Calculates the metric tensor at x.
+        Matrix4d getMetricTensor(Vector4d x);
+        // Calculates the Christoffel symbols at x using central difference numerical derivatives.
         // Returns an array of 4 Eigen::Matrix4d objects, one for each coordinate of the upper index.
         // TODO: Use GiNaC or something to do this symbolically using the form of the metric.
         std::vector<Matrix4d> getChristoffelSymbols(Vector4d x, Matrix4d &metric);

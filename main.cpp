@@ -8,11 +8,16 @@ int main()
 {
     World world_test;
     Particle particle_test;
-    particle_test.setX(Vector4d { 40., -5., 10.4, 8. });
+    particle_test.setX(Vector4d { 40., -200, 300, 400 });
+    particle_test.setV(Vector4d { 1., 1., 0., 0. });
     particle_test.updateMetric(world_test.getMetricTensor(particle_test.x));
-    std::vector<Matrix4d> christoffel = world_test.getChristoffelSymbols(particle_test.x, particle_test.metric);
-    std::cout << christoffel[0] << "\n";
-    std::cout << christoffel[2] << "\n";
+
+    for (int i = 0; i < 100; i++)
+    {
+        std::cout << particle_test.scalarProduct() << "\n";
+        std::cout << particle_test.x << "\n";
+        particle_test.advance(1e-3, world_test);
+    }
 
     return 0;
 }

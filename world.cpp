@@ -5,12 +5,12 @@
 using namespace Eigen;
 
 // Currently returns the Schwarzschild metric with a Schwarzschild radius of 1 (normalised units).
-// Probably want to store a set of well-known metrics that the user can select.
-Matrix4d World::getMetricTensor(Vector4d &x)
+// TODO: Probably want to store a set of common metrics that the user can select.
+Matrix4d World::getMetricTensor(Vector4d x)
 {
     const double r_s = 1.;
     double r = x(seq(1, 3)).dot(x(seq(1, 3)));
-    const double r_squared = r*r;
+    double r_squared = r*r;
     double mult_factor = r_s / (r_squared * (r - r_s));
     Matrix4d metric;
     metric.setIdentity();
@@ -30,8 +30,16 @@ Matrix4d World::getMetricTensor(Vector4d &x)
     return metric;
 }
 
-// TODO: Write central difference numerical derivatives to get the Christoffel symbols.
-// Consider using GiNaC to do this symbolically.
+// Minkowski metric.
+// Matrix4d World::getMetricTensor(Vector4d x)
+// {
+//     Matrix4d metric;
+//     metric.setIdentity();
+//     metric(0, 0) = -1.;
+//     return metric;
+// }
+
+// TODO: Consider using GiNaC to do this symbolically (though I doubt this will be beneficial for complicated metrics).
 std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
 {
     // The metric at x is also passed in because it should already be present in whatever particle this
@@ -45,7 +53,7 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
 
     // Derivatives of the metric along each component.
     std::vector<Matrix4d> metric_derivs (4);
-    for (int i = 0; i < 4; i++)
+    for (int mu = 0; mu < 4; mu++)
     {
         // Second-order central difference scheme.
         Matrix4d metric_forward;
@@ -53,11 +61,11 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
 
         // Don't pass x by reference to stop intermediate_x modifying x.
         Vector4d intermediate_x { x };
-        intermediate_x(i) += step;
+        intermediate_x(mu) += step;
         metric_forward = getMetricTensor(intermediate_x);
-        intermediate_x(i) -= 2.*step;
+        intermediate_x(mu) -= 2.*step;
         metric_backward = getMetricTensor(intermediate_x);
-        metric_derivs[i] = (metric_forward - metric_backward) / (2.*step);
+        metric_derivs[mu] = (metric_forward - metric_backward) / (2.*step);
     }
 
     Matrix4d metricInverse = metric.inverse();
@@ -78,7 +86,7 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
                         - metric_derivs[gamma](mu, nu);
                 }
                 christoffel_component(mu, nu) = metricInverse.col(alpha).dot(metric_deriv_components);
-                // This is redundant when mu = nu, but rather this than putting an if statement in.
+                // This is redundant when mu = nu, but rather this than an if statement.
                 christoffel_component(nu, mu) = christoffel_component(mu, nu);
             }
         }

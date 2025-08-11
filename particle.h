@@ -1,6 +1,7 @@
 #ifndef PARTICLE
 #define PARTICLE
 
+#include "world.h"
 #include <Eigen/Dense>
 
 /*
@@ -26,7 +27,13 @@ class Particle
         void updateMetric(Matrix4d new_metric);
         // Advances the simulation using RK4 by a parameter step, dl.
         // TODO: Consider other, potentially more stable ODE integrators, e.g. a symplectic integrator.
-        void advance(double &dl);
+        void advance(double dl, World &simulation);
+
+        // Returns the scalar product of the 4-velocity; primarily for debugging purposes.
+        double scalarProduct();
 };
+
+// Return the parameter derivative of a 4-velocity under the provided Christoffel symbols.
+Vector4d v_derivative(Vector4d v, std::vector<Matrix4d> &christoffel_symbols);
 
 #endif
