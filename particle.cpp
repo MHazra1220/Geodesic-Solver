@@ -26,8 +26,8 @@ void Particle::updateMetric(Matrix4d new_metric)
 void Particle::advance(double dl, World &simulation)
 {
     // Currently defined to advance with RK4.
-    Vector4d x_step;
-    Vector4d v_step;
+    Vector4d x_step { 0., 0., 0., 0. };
+    Vector4d v_step { 0., 0., 0., 0. };
 
     Vector4d k_n_minus_1_x;
     Vector4d k_n_x;
@@ -48,7 +48,7 @@ void Particle::advance(double dl, World &simulation)
     v_step += k_n_v;
 
     // Calculate k_2 and k_3.
-    for (int i = 0; i < 2; i++)
+    for (int i { 0 }; i < 2; i++)
     {
         k_n_minus_1_x = k_n_x;
         k_n_minus_1_v = k_n_v;
@@ -82,29 +82,17 @@ void Particle::advance(double dl, World &simulation)
 // Returns the scalar product of the 4-velocity. Primarily for debugging to check the scalar product is conserved.
 double Particle::scalarProduct()
 {
-    // This should be faster than a simple double for loop.
-    Vector4d col_contractions;
-    for (int nu = 0; nu < 4; nu++)
-    {
-        col_contractions(nu) = metric.col(nu).dot(v);
-    }
-
-    return col_contractions.dot(v);
+    return v.dot(metric*v);
 }
 
 // Returns the derivative of the given 4-velocity using the provided Christoffel symbols.
 Vector4d v_derivative(Vector4d v, std::vector<Matrix4d> &christoffel_symbols)
 {
     Vector4d acceleration;
-    Vector4d col_contractions;
-    // Should be faster than a triple for loop.
-    for (int alpha = 0; alpha < 4; alpha++)
+    double sum;
+    for (int mu { 0 }; mu < 4; mu++)
     {
-        for (int sigma = 0; sigma < 4; sigma++)
-        {
-            col_contractions(sigma) = christoffel_symbols[alpha].col(sigma).dot(v);
-        }
-        acceleration(alpha) = col_contractions.dot(v);
+        acceleration(mu) = -1.*v.dot(christoffel_symbols[mu]*v);
     }
 
     return acceleration;
