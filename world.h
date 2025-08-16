@@ -23,6 +23,9 @@ class World
 
         // Calculates the metric tensor at x.
         Matrix4d getMetricTensor(Vector4d x);
+        // Calculates the Euclidean distance; this is useful for some metrics (e.g.
+        // calculating if a photon has crossed inside the photon sphere).
+        double getEuclideanDistance(Vector4d x);
         // Calculates the Christoffel symbols at x using central difference numerical derivatives.
         // Returns an array of 4 Eigen::Matrix4d objects, one for each coordinate of the upper index.
         // TODO: Use GiNaC or something to do this symbolically using the form of the metric.

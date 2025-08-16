@@ -1,5 +1,6 @@
 #include "particle.h"
 #include "world.h"
+#include <cmath>
 #include <Eigen/Dense>
 
 using namespace Eigen;
@@ -14,6 +15,26 @@ void Particle::setV(Vector4d new_v)
     v = new_v;
 }
 
+/*
+ * Modifies the t-component of the 4-velocity to make the vector null.
+ * R equires v and the* metric at the current coordinates to be defined.
+ * This requires solving a quadratic equation for the t-component; assume
+ * that you should take the more positive component because g_00 is
+ * probably negative. Note that both solutions are negative in a black hole.
+ * The raytracer evolves photons "backwards", as if they are being emitted
+ * from the camera/observer. Use this when defining the initial velocities
+ * of photons to force them to be null.
+ */
+void Particle::makeVNull()
+{
+    double a { metric(0, 0) };
+    double b { 2.*metric(seq(1, 3), 0).dot(v(seq(1, 3))) };
+    Matrix3d spatial_metric { metric(seq(1, 3), seq(1, 3)) };
+    Vector3d spatial_v { v(seq(1, 3)) };
+    double c { spatial_v.dot(spatial_metric*spatial_v) };
+    v(0) = (-b - sqrt(b*b - 4.*a*c)) / (2.*a);
+}
+
 void Particle::updateMetric(Matrix4d new_metric)
 {
     metric = new_metric;
@@ -22,10 +43,10 @@ void Particle::updateMetric(Matrix4d new_metric)
 // Advances the ray path by a parameter step, dl.
 // WARNING: Due to the null constraint, there are only three independent
 // velocity components, but it's much simpler to integrate all 4 (and
-// probably not slower or much less accurate, if at all).
+// probably not slower or any less accurate).
 void Particle::advance(double dl, World &simulation)
 {
-    // Currently defined to advance with RK4.
+    // Currently advances with RK4.
     Vector4d x_step { 0., 0., 0., 0. };
     Vector4d v_step { 0., 0., 0., 0. };
 

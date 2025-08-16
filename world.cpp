@@ -6,6 +6,9 @@
 using namespace Eigen;
 
 // Currently returns the Schwarzschild metric with a Schwarzschild radius of 1 (normalised units).
+// Keep in mind that, for a Schwarzschild metric, there is no need to simulate a photon that crosses inside
+// the photon sphere; any photon that does so it guaranteed to cross the horizon and should render
+// a black pixel.
 // TODO: Probably want to store a set of common metrics that the user can select.
 Matrix4d World::getMetricTensor(Vector4d x)
 {
@@ -29,21 +32,14 @@ Matrix4d World::getMetricTensor(Vector4d x)
     metric(2, 2) += 1.;
     metric(3, 3) += 1.;
 
-    // metric.setIdentity();
-    // metric(0, 0) = -1. + r_s/r;
-    // metric(1, 1) += x(1)*x(1);
-    // metric(2, 2) += x(2)*x(2);
-    // metric(3, 3) += x(3)*x(3);
-    // metric(1, 2) = x(1)*x(2);
-    // metric(2, 1) = metric(1, 2);
-    // metric(1, 3) = x(1)*x(3);
-    // metric(3, 1) = metric(1, 3);
-    // metric(2, 3) = x(2)*x(3);
-    // metric(3, 2) = metric(2, 3);
-    // metric *= mult_factor;
-    // metric(0, 0) /= mult_factor;
-
     return metric;
+}
+
+// Calculates the Euclidean distance; this is useful for some metrics (e.g.
+// calculating if a photon has crossed inside the photon sphere).
+double World::getEuclideanDistance(Vector4d x)
+{
+    return sqrt(x(seq(1, 3)).dot(x(seq(1, 3))));
 }
 
 // Minkowski metric.
@@ -56,6 +52,7 @@ Matrix4d World::getMetricTensor(Vector4d x)
 // }
 
 // TODO: Consider using GiNaC to do this symbolically (though I doubt this will be beneficial for complicated metrics).
+// TODO: Consider writing a Hamiltonian raytracer that doesn't require the Christoffel symbols.
 std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
 {
     // The metric at x is also passed in because it should already be present in whatever particle this
