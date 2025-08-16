@@ -2,6 +2,7 @@
 #define PARTICLE
 
 #include "world.h"
+#include "camera.h"
 #include <Eigen/Dense>
 
 /*
@@ -14,27 +15,27 @@ using namespace Eigen;
 
 class Particle
 {
-    public:
-        // 4-position in (t, x, y, z) coordinates of the particle.
-        Vector4d x{ 0., 0., 0., 0. };
-        // TODO: 4-velocity of the particle; default components depend on whether the particle is light-like or time-like.
-        Vector4d v{ 1., 0., 0., 0. };
-        // Metric tensor at the particle's coordinates, assumed to be symmetric (torsion-free).
-        Matrix4d metric;
+public:
+    // 4-position in (t, x, y, z) coordinates of the particle.
+    Vector4d x;
+    // TODO: 4-velocity of the particle; default components depend on whether the particle is light-like or time-like.
+    Vector4d v;
+    // Metric tensor at the particle's coordinates, assumed to be symmetric (torsion-free).
+    Matrix4d metric;
 
-        void setX(Vector4d new_x);
-        void setV(Vector4d new_v);
-        void makeVNull();
-        void updateMetric(Matrix4d new_metric);
-        // Advances the simulation using RK4 by a parameter step, dl.
-        // TODO: Consider other, potentially more stable ODE integrators, e.g. a symplectic integrator.
-        void advance(double dl, World &simulation);
+    void setX(Vector4d new_x);
+    void setV(Vector4d new_v);
+    void makeVNull();
+    void updateMetric(Matrix4d new_metric);
+    // Advances the simulation using RK4 by a parameter step, dl.
+    // TODO: Consider other, potentially more stable ODE integrators, e.g. a symplectic integrator.
+    void advance(double dl, World &simulation);
 
-        // Returns the scalar product of the 4-velocity; primarily for debugging purposes.
-        double scalarProduct();
+    // Returns the scalar product of the 4-velocity; primarily for debugging purposes.
+    double scalarProduct();
 };
 
-// Return the parameter derivative of a 4-velocity under the provided Christoffel symbols.
+// Return the parameter derivative of the given 4-velocity under the provided Christoffel symbols.
 Vector4d v_derivative(Vector4d v, std::vector<Matrix4d> &christoffel_symbols);
 
 #endif

@@ -92,8 +92,8 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
                 for (int gamma { 0 }; gamma < 4; gamma++)
                 {
                     metric_deriv_components(gamma) = metric_derivs[nu](gamma, mu)
-                        + metric_derivs[mu](gamma, nu)
-                        - metric_derivs[gamma](mu, nu);
+                    + metric_derivs[mu](gamma, nu)
+                    - metric_derivs[gamma](mu, nu);
                 }
                 christoffel_component(mu, nu) = 0.5*metricInverse.col(alpha).dot(metric_deriv_components);
                 // This is redundant when mu = nu, but rather this than an if statement.
