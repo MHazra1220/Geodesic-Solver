@@ -22,6 +22,8 @@ public:
     Vector4d v;
     // Metric tensor at the particle's coordinates, assumed to be symmetric (torsion-free).
     Matrix4d metric;
+    // dl, the parameter step, will never be larger than this.
+    double maxParameterStep { 0.5 };
 
     void setX(Vector4d new_x);
     void setV(Vector4d new_v);
@@ -29,10 +31,14 @@ public:
     void updateMetric(Matrix4d new_metric);
     // Advances the simulation using RK4 by a parameter step, dl.
     // TODO: Consider other, potentially more stable ODE integrators, e.g. a symplectic integrator.
-    void advance(double dl, World &simulation);
-
+    void advance(World &simulation);
     // Returns the scalar product of the 4-velocity; primarily for debugging purposes.
     double scalarProduct();
+    // Estimates the deviation of the metric from the Minkowski metric as a cheap way of
+    // estimating how twisted spacetime is to adapt the step size. Basically just doing anything
+    // to avoid calculating the Riemann tensor.
+    double minkowskiDeviation();
+    double calculateParameterStep();
 };
 
 // Return the parameter derivative of the given 4-velocity under the provided Christoffel symbols.

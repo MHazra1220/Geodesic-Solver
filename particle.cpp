@@ -27,10 +27,10 @@ void Particle::setV(Vector4d new_v)
  */
 void Particle::makeVNull()
 {
-    double a { metric(0, 0) };
-    double b { 2.*metric(seq(1, 3), 0).dot(v(seq(1, 3))) };
-    Matrix3d spatial_metric { metric(seq(1, 3), seq(1, 3)) };
     Vector3d spatial_v { v(seq(1, 3)) };
+    double a { metric(0, 0) };
+    double b { 2.*metric(seq(1, 3), 0).dot(spatial_v) };
+    Matrix3d spatial_metric { metric(seq(1, 3), seq(1, 3)) };
     double c { spatial_v.dot(spatial_metric*spatial_v) };
     v(0) = (-b - sqrt(b*b - 4.*a*c)) / (2.*a);
 }
@@ -44,8 +44,13 @@ void Particle::updateMetric(Matrix4d new_metric)
 // WARNING: Due to the null constraint, there are only three independent
 // velocity components, but it's much simpler to integrate all 4 (and
 // probably not slower or any less accurate).
-void Particle::advance(double dl, World &simulation)
+// TODO: Adapt the step-size based on how far the metric at the position
+// deviates from the Minkowski metric.
+void Particle::advance(World &simulation)
 {
+    // Calculate parameter step.
+    double dl { calculateParameterStep() };
+
     // Currently advances with RK4.
     Vector4d x_step { 0., 0., 0., 0. };
     Vector4d v_step { 0., 0., 0., 0. };
@@ -98,12 +103,47 @@ void Particle::advance(double dl, World &simulation)
     // Advance x and v.
     x += (dl/6.)*x_step;
     v += (dl/6.)*v_step;
+
+    updateMetric(simulation.getMetricTensor(x));
 }
 
-// Returns the scalar product of the 4-velocity. Primarily for debugging to check the scalar product is conserved.
+// Scalar product of the 4-velocity. Primarily for debugging to check the scalar product is conserved.
 double Particle::scalarProduct()
 {
     return v.dot(metric*v);
+}
+
+// Tries to estimate how far the metric deviates from the Minkowski metric as a cheap way
+// of estimating how curved the spacetime is without resorting to the Riemann tensor.
+double Particle::minkowskiDeviation()
+{
+    // Try to "normalise" the metric against things that scale the entire metric
+    // but don't actually cause any curvature.
+    double scale_factor { 0 };
+    scale_factor = metric.diagonal().cwiseAbs().sum() / 4.;
+    Matrix4d minkowski;
+    minkowski.setIdentity();
+    minkowski(0, 0) = -1.;
+    Matrix4d deviation { metric/scale_factor - minkowski };
+    // Sum up the absolute values of this deviation matrix.
+    return deviation.cwiseAbs().sum();
+}
+
+// Calculates an adaptive step size by estimating how curved the space is.
+double Particle::calculateParameterStep()
+{
+    double deviation { minkowskiDeviation() };
+    // Designate a deviation of approximately 3 to give a step size of 0.01 (this produces stability
+    // for about 3-4 orbits in a photon ring orbit around a Schwarzschild black hole).
+    double step { 1e-2 * (3./deviation) };
+    if (step < maxParameterStep)
+    {
+        return step;
+    }
+    else
+    {
+        return maxParameterStep;
+    }
 }
 
 // Returns the derivative of the given 4-velocity using the provided Christoffel symbols.

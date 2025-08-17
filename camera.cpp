@@ -45,6 +45,8 @@ Vector3d Camera::calculateStartDirection(int x, int y)
     start_direction(3) = cos(theta);
     // Rotate to align with the camera orientation.
     return quaternionRotate(start_direction, camera_orientation);
+    // From here, the Particle/Photon object this is sent to needs
+    // to normalise the direction to a null 4-velocity.
 }
 
 // Returns the Hamilton product of u with v.

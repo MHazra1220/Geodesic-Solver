@@ -35,24 +35,17 @@ Matrix4d World::getMetricTensor(Vector4d x)
     return metric;
 }
 
-// Calculates the Euclidean distance; this is useful for some metrics (e.g.
-// calculating if a photon has crossed inside the photon sphere).
+// Calculates the Euclidean "distance"; this is useful for some metrics (e.g.
+// calculating if a photon has crossed inside the photon sphere of the Schwarzschild metric)
+// and for checking if a photon has escaped sufficiently far to infinity (i.e. hit the
+// background skybox/skysphere).
 double World::getEuclideanDistance(Vector4d x)
 {
     return sqrt(x(seq(1, 3)).dot(x(seq(1, 3))));
 }
 
-// Minkowski metric.
-// Matrix4d World::getMetricTensor(Vector4d x)
-// {
-//     Matrix4d metric;
-//     metric.setIdentity();
-//     metric(0, 0) = -1.;
-//     return metric;
-// }
-
 // TODO: Consider using GiNaC to do this symbolically (though I doubt this will be beneficial for complicated metrics).
-// TODO: Consider writing a Hamiltonian raytracer that doesn't require the Christoffel symbols.
+// TODO: Consider writing a Hamiltonian raytracer that doesn't require the Christoffel symbols (but does require multiple matrix inversions).
 std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
 {
     // The metric at x is also passed in because it should already be present in whatever particle this
@@ -68,14 +61,15 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
     std::vector<Matrix4d> metric_derivs (4);
     Matrix4d metric_forward;
     Matrix4d metric_backward;
+    Vector4d intermediate_x { x };
     for (int mu { 0 }; mu < 4; mu++)
     {
-        Vector4d intermediate_x { x };
         intermediate_x(mu) += step;
         metric_forward = getMetricTensor(intermediate_x);
         intermediate_x(mu) -= 2.*step;
         metric_backward = getMetricTensor(intermediate_x);
         metric_derivs[mu] = (metric_forward - metric_backward) / (2.*step);
+        intermediate_x(mu) = x(mu);
     }
 
     Matrix4d metricInverse { metric.inverse() };
@@ -96,7 +90,7 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
                     - metric_derivs[gamma](mu, nu);
                 }
                 christoffel_component(mu, nu) = 0.5*metricInverse.col(alpha).dot(metric_deriv_components);
-                // This is redundant when mu = nu, but rather this than an if statement.
+                // This is redundant when mu = nu, but probably faster than an if statement.
                 christoffel_component(nu, mu) = christoffel_component(mu, nu);
             }
         }
