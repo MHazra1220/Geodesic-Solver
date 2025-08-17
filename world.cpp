@@ -52,7 +52,7 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
     // is being used for.
     // Each entry corresponds to a coordinate of the upper index of the Christoffel symbols.
     std::vector<Matrix4d> christoffel_symbols (4);
-    // Assumed default step in each coordinate (only really works if c=1).
+    // Assumed default step in each coordinate.
     // TODO: How do you define this adaptively to not break near areas of extreme distortion?
     // For now, just set it to a small number.
     double step { 1e-4 };

@@ -28,6 +28,7 @@ public:
     void setX(Vector4d new_x);
     void setV(Vector4d new_v);
     void makeVNull();
+    void normaliseV();
     void updateMetric(Matrix4d new_metric);
     // Advances the simulation using RK4 by a parameter step, dl.
     // TODO: Consider other, potentially more stable ODE integrators, e.g. a symplectic integrator.

@@ -27,7 +27,7 @@ int main()
 
     double product;
 
-    for (int i { 0 }; i < 1000; i++)
+    for (int i { 0 }; i < 1500; i++)
     {
         // product = particle_test.scalarProduct();
         // std::cout << product << "\n";

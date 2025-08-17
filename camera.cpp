@@ -27,7 +27,7 @@ void Camera::setCameraLocation(Vector3d location)
 // Used to rotate the starting 4-velocities of photons.
 void Camera::setCameraOrientation(Vector4d orientation)
 {
-    camera_orientation = orientation;
+    camera_orientation = orientation / orientation.norm();
 }
 
 // Calculates the starting direction of the photon mapped to pixel x and pixel y.
@@ -49,7 +49,7 @@ Vector3d Camera::calculateStartDirection(int x, int y)
     // to normalise the direction to a null 4-velocity.
 }
 
-// Returns the Hamilton product of u with v.
+// Returns the Hamilton (quaternionic) product of u with v.
 Vector4d hamiltonProduct(Vector4d u, Vector4d v)
 {
     Vector4d result;

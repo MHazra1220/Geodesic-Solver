@@ -33,6 +33,14 @@ void Particle::makeVNull()
     Matrix3d spatial_metric { metric(seq(1, 3), seq(1, 3)) };
     double c { spatial_v.dot(spatial_metric*spatial_v) };
     v(0) = (-b - sqrt(b*b - 4.*a*c)) / (2.*a);
+    normaliseV();
+}
+
+// Makes the L2 (Euclidean) norm of the 4-velocity 1 for the sake
+// of maintaining a roughly consistent affine parameterisation.
+void Particle::normaliseV()
+{
+    v /= v.norm();
 }
 
 void Particle::updateMetric(Matrix4d new_metric)
@@ -117,10 +125,9 @@ double Particle::scalarProduct()
 // of estimating how curved the spacetime is without resorting to the Riemann tensor.
 double Particle::minkowskiDeviation()
 {
-    // Try to "normalise" the metric against things that scale the entire metric
-    // but don't actually cause any curvature.
-    double scale_factor { 0 };
-    scale_factor = metric.diagonal().cwiseAbs().sum() / 4.;
+    // Try to "normalise" against things that scale the entire metric
+    // but don't actually cause curvature.
+    double scale_factor { metric.diagonal().cwiseAbs().sum() / 4. };
     Matrix4d minkowski;
     minkowski.setIdentity();
     minkowski(0, 0) = -1.;
@@ -132,10 +139,9 @@ double Particle::minkowskiDeviation()
 // Calculates an adaptive step size by estimating how curved the space is.
 double Particle::calculateParameterStep()
 {
-    double deviation { minkowskiDeviation() };
-    // Designate a deviation of approximately 3 to give a step size of 0.01 (this produces stability
-    // for about 3-4 orbits in a photon ring orbit around a Schwarzschild black hole).
-    double step { 1e-2 * (3./deviation) };
+    // Designate a deviation of approximately 3 to give a step size of 0.02 (this produces good stability
+    // for many orbits in the photon sphere around a Schwarzschild black hole of r_s = 1).
+    double step { 2e-2 * (3./minkowskiDeviation()) };
     if (step < maxParameterStep)
     {
         return step;
@@ -150,7 +156,6 @@ double Particle::calculateParameterStep()
 Vector4d v_derivative(Vector4d v, std::vector<Matrix4d> &christoffel_symbols)
 {
     Vector4d acceleration;
-    double sum;
     for (int mu { 0 }; mu < 4; mu++)
     {
         acceleration(mu) = -1.*v.dot(christoffel_symbols[mu]*v);
