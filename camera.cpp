@@ -31,12 +31,12 @@ void Camera::setCameraOrientation(Vector4d orientation)
 }
 
 // Calculates the starting direction of the photon mapped to pixel x and pixel y.
-// x and y are coordinates from the centre of the camera view, not a corner.
+// x=0 and y=0 are the bottom-left corner of the camera.
 Vector3d Camera::calculateStartDirection(int x, int y)
 {
     double conversion_factor { fov_width_rad/double_width };
-    double phi { x*conversion_factor };
-    double theta { y*conversion_factor + 0.5*pi };
+    double phi { (x-0.5*double_width)*conversion_factor };
+    double theta { (y-0.5*double_height)*conversion_factor + 0.5*pi };
 
     // Convert to a Cartesian unit vector in (x, y, z).
     Vector3d start_direction;

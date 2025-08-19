@@ -29,7 +29,7 @@ public:
     void setCameraOrientation(Vector4d orientation);
 
     // Calculates the starting direction of the photon mapped to pixel x and pixel y.
-    // x and y are coordinates from the centre of the camera view, not a corner.
+    // x=0 and y=0 is the bottom left corner.
     Vector3d calculateStartDirection(int x, int y);
 
 private:

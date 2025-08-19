@@ -38,6 +38,7 @@ void Particle::makeVNull()
 
 // Makes the L2 (Euclidean) norm of the 4-velocity 1 for the sake
 // of maintaining a roughly consistent affine parameterisation.
+// WARNING: this is not a "unit" velocity!
 void Particle::normaliseV()
 {
     v /= v.norm();
@@ -141,7 +142,13 @@ double Particle::calculateParameterStep()
 {
     // Designate a deviation of approximately 3 to give a step size of 0.02 (this produces good stability
     // for many orbits in the photon sphere around a Schwarzschild black hole of r_s = 1).
-    double step { 2e-2 * (3./minkowskiDeviation()) };
+    double deviation { minkowskiDeviation() };
+    if (deviation == 0.)
+    {
+        // Exactly the Minkowski metric.
+        return maxParameterStep;
+    }
+    double step { 2e-2 * (3./deviation) };
     if (step < maxParameterStep)
     {
         return step;
@@ -150,6 +157,15 @@ double Particle::calculateParameterStep()
     {
         return maxParameterStep;
     }
+}
+
+// Calculates the Euclidean "distance"; this is useful for some metrics (e.g.
+// calculating if a photon has crossed inside the photon sphere of the Schwarzschild metric)
+// and for checking if a photon has escaped sufficiently far to infinity (i.e. hit the
+// background skysphere/sky map).
+double Particle::getEuclideanDistance()
+{
+    return sqrt(x(seq(1, 3)).dot(x(seq(1, 3))));
 }
 
 // Returns the derivative of the given 4-velocity using the provided Christoffel symbols.

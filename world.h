@@ -1,6 +1,7 @@
 #ifndef WORLD
 #define WORLD
 
+#include <string>
 #include <Eigen/Dense>
 
 using namespace Eigen;
@@ -11,18 +12,29 @@ using namespace Eigen;
  *  in terms of just (t, x, y, z).
  */
 
-// World is the internal simulation object and contains the metric and all the rays.
+// World contains information and routines about the spacetime and background image.
 class World
 {
 public:
+    // Image parameters of the sky map.
+    int sky_width { 0 };
+    int sky_height { 0 };
+    // Note this is the number of bytes used to store each pixel, not bits!
+    int byte_depth { 0 };
+
     // Calculates the metric tensor at x.
     Matrix4d getMetricTensor(Vector4d x);
-    // Calculates the Euclidean distance; this is useful for some metrics (e.g.
-    // calculating if a photon has crossed inside the photon sphere).
-    double getEuclideanDistance(Vector4d x);
     // Calculates the Christoffel symbols at x using central difference numerical derivatives.
     // Returns an array of 4 Eigen::Matrix4d objects, one for each coordinate of the upper index.
     std::vector<Matrix4d> getChristoffelSymbols(Vector4d x, Matrix4d &metric);
+    // Reads in a bitmap as a spherical sky map in equirectangular projection.
+    // Assumed for now to be a bitmap with 2:1 aspect ratio.
+    void readSkyMap(char* image_path);
+
+private:
+    // Pointer to the pixel array of the sky map.
+    unsigned char* sky_map {};
+    double sky_box_distance { 250. };
 };
 
 #endif

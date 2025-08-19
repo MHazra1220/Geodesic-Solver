@@ -16,14 +16,14 @@ using namespace Eigen;
 class Particle
 {
 public:
-    // 4-position in (t, x, y, z) coordinates of the particle.
+    // 4-position of the photon in (t, x, y, z) coordinates.
     Vector4d x;
-    // TODO: 4-velocity of the particle; default components depend on whether the particle is light-like or time-like.
+    // 4-velocity of the photon.
     Vector4d v;
     // Metric tensor at the particle's coordinates, assumed to be symmetric (torsion-free).
     Matrix4d metric;
     // dl, the parameter step, will never be larger than this.
-    double maxParameterStep { 0.5 };
+    double maxParameterStep { 4. };
 
     void setX(Vector4d new_x);
     void setV(Vector4d new_v);
@@ -40,6 +40,9 @@ public:
     // to avoid calculating the Riemann tensor.
     double minkowskiDeviation();
     double calculateParameterStep();
+    // Calculates the Euclidean distance to the origin; this is useful for some metrics (e.g.
+    // calculating if a photon has crossed inside the photon sphere).
+    double getEuclideanDistance();
 };
 
 // Return the parameter derivative of the given 4-velocity under the provided Christoffel symbols.

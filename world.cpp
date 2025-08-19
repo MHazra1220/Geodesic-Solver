@@ -1,7 +1,10 @@
 #include "world.h"
+#include <iostream>
 #include <cmath>
 #include <vector>
 #include <Eigen/Dense>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 using namespace Eigen;
 
@@ -33,15 +36,6 @@ Matrix4d World::getMetricTensor(Vector4d x)
     metric(3, 3) += 1.;
 
     return metric;
-}
-
-// Calculates the Euclidean "distance"; this is useful for some metrics (e.g.
-// calculating if a photon has crossed inside the photon sphere of the Schwarzschild metric)
-// and for checking if a photon has escaped sufficiently far to infinity (i.e. hit the
-// background skybox/skysphere).
-double World::getEuclideanDistance(Vector4d x)
-{
-    return sqrt(x(seq(1, 3)).dot(x(seq(1, 3))));
 }
 
 // TODO: Consider using GiNaC to do this symbolically (though I doubt this will be beneficial for complicated metrics).
@@ -98,4 +92,11 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
     }
 
     return christoffel_symbols;
+}
+
+// Image path should lead to a 2:1 aspect ratio, equirectangular-projected, panoramic image.
+void World::readSkyMap(char* image_path)
+{
+    // This is often too large for stack allocation, so stbi_load() returns a pointer to the array on the heap.
+    sky_map = stbi_load(image_path, &sky_width, &sky_height, &byte_depth, 3);
 }

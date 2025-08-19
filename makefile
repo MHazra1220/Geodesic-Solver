@@ -5,7 +5,7 @@ main.o: main.cpp
 	g++ -c main.cpp -fopenmp
 
 world.o: world.h world.cpp
-	g++ -c world.cpp
+	g++ -c world.cpp -fopenmp
 
 particle.o: particle.h particle.cpp
 	g++ -c particle.cpp
