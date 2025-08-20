@@ -1,6 +1,7 @@
 #ifndef CAMERA
 #define CAMERA
 
+#include <vector>
 #include <Eigen/Dense>
 
 using namespace Eigen;
@@ -8,9 +9,9 @@ using namespace Eigen;
 class Camera
 {
 public:
-    // Render resolution; 1440p widescreen by default.
-    int image_width { 2560 };
-    int image_height { 1440 };
+    // Render resolution; 1080p widescreen by default.
+    int image_width { 1920 };
+    int image_height { 1080 };
     // Store double versions for the sake of calculation.
     double double_width;
     double double_height;
@@ -22,6 +23,8 @@ public:
     Vector3d camera_location;
     // Quaternion that determines the orientation of the camera, defined as a rotation from pointing along +x with zero angle.
     Vector4d camera_orientation { 1., 0., 0., 0. };
+    // Pixel array of the camera's view.
+    std::vector<unsigned char> camera_view;
 
     void setWidthHeight(int pixels_width, int pixels_height);
     void setFov(double fov);

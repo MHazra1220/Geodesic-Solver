@@ -1,7 +1,7 @@
 #ifndef WORLD
 #define WORLD
 
-#include <string>
+#include <vector>
 #include <Eigen/Dense>
 
 using namespace Eigen;
@@ -30,10 +30,14 @@ public:
     // Reads in a bitmap as a spherical sky map in equirectangular projection.
     // Assumed for now to be a bitmap with 2:1 aspect ratio.
     void readSkyMap(char* image_path);
+    // Returns a pointer to the RGB pixel from the sky map at pixel (x, y), where (0, 0) is the top-left pixel.
+    unsigned char* readPixelFromSkyMap(int x, int y);
 
 private:
     // Pointer to the pixel array of the sky map.
-    unsigned char* sky_map {};
+    unsigned char* sky_map_pointer { nullptr };
+    // Use a vector in practice to let C++ manage its memory properly.
+    std::vector<unsigned char> sky_map;
     double sky_box_distance { 250. };
 };
 

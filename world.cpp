@@ -9,10 +9,10 @@
 using namespace Eigen;
 
 // Currently returns the Schwarzschild metric with a Schwarzschild radius of 1 (normalised units).
-// Keep in mind that, for a Schwarzschild metric, there is no need to simulate a photon that crosses inside
-// the photon sphere; any photon that does so it guaranteed to cross the horizon and should render
-// a black pixel.
-// TODO: Probably want to store a set of common metrics that the user can select.
+// Keep in mind that, for a Schwarzschild metric, there is no need to further advance a photon that crosses inside
+// the photon sphere; assume there is nothing within the photon sphere emitting light and treat
+// the pixel as black.
+// TODO: Store a set of common, analytical metrics that the user can select.
 Matrix4d World::getMetricTensor(Vector4d x)
 {
     const double r_s = 1.;
@@ -95,8 +95,38 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
 }
 
 // Image path should lead to a 2:1 aspect ratio, equirectangular-projected, panoramic image.
+// TODO: currently no check that the image is indeed 2:1 or anything to crop the image when it isn't.
 void World::readSkyMap(char* image_path)
 {
+    // image_path should be a pointer to a C-style array of char[].
     // This is often too large for stack allocation, so stbi_load() returns a pointer to the array on the heap.
-    sky_map = stbi_load(image_path, &sky_width, &sky_height, &byte_depth, 3);
+    // Force to load as RGB (3 bytes per pixel).
+    sky_map_pointer = stbi_load(image_path, &sky_width, &sky_height, &byte_depth, 3);
+    if (sky_map_pointer != NULL)
+    {
+        // Store in a std::vector to let C++ handle memory management.
+        sky_map = std::vector<unsigned char>(sky_map_pointer, sky_map_pointer + sky_width*sky_height*byte_depth);
+    }
+    else
+    {
+        std::cout << "Image failed to load." << "\n";
+    }
+    stbi_image_free(sky_map_pointer);
+}
+
+// Gets the RGB pixel from the sky map at pixel (x, y), where (0, 0) is the top-left pixel.
+unsigned char* World::readPixelFromSkyMap(int x, int y)
+{
+    if (x >= sky_width || y >= sky_height)
+    {
+        std::cout << "Warning: requested pixel: (" << x << ", " << y << ") is out of range." << "\n";
+        // Assign to a null pointer when invalid.
+        unsigned char* pixel { nullptr };
+        return pixel;
+    }
+
+    // Gets the address of this particular pixel; use pixel[i] with i=0, 1, 2 for R, G, B.
+    // Note that this is not returned as int! Use static_cast<int>() if necessary.
+    unsigned char* pixel { &sky_map[(y*sky_height + x)*byte_depth] };
+    return pixel;
 }
