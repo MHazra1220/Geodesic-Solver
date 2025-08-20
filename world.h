@@ -21,6 +21,8 @@ public:
     int sky_height { 0 };
     // Note this is the number of bytes used to store each pixel, not bits!
     int byte_depth { 0 };
+    // Use a vector in practice to let C++ manage its memory properly.
+    std::vector<unsigned char> sky_map;
 
     // Calculates the metric tensor at x.
     Matrix4d getMetricTensor(Vector4d x);
@@ -36,8 +38,6 @@ public:
 private:
     // Pointer to the pixel array of the sky map.
     unsigned char* sky_map_pointer { nullptr };
-    // Use a vector in practice to let C++ manage its memory properly.
-    std::vector<unsigned char> sky_map;
     double sky_box_distance { 250. };
 };
 

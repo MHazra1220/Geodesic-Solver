@@ -1,6 +1,9 @@
 #include "camera.h"
 #include <cmath>
+#include <vector>
 #include <Eigen/Dense>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 using namespace Eigen;
 
@@ -10,6 +13,9 @@ void Camera::setWidthHeight(int pixels_width, int pixels_height)
     image_height = pixels_height;
     double_width = image_width;
     double_height = image_height;
+    // Set the size of the array of the camera view pixel array.
+    // 3 bytes per pixel for RGB.
+    camera_view.resize(image_width*image_height*3);
 }
 
 void Camera::setFov(double fov)
@@ -47,6 +53,25 @@ Vector3d Camera::calculateStartDirection(int x, int y)
     return quaternionRotate(start_direction, camera_orientation);
     // From here, the Particle/Photon object this is sent to needs
     // to normalise the direction to a null 4-velocity.
+}
+
+void Camera::traceImage()
+{
+    // Go through each ray.
+    for (int x { 0 }; x < image_width; x++)
+    {
+        for (int y { 0 }; y < image_height; y++)
+        {
+
+        }
+    }
+}
+
+// Output the pixel array of the camera's view to an image file.
+void Camera::writeCameraImage(char* image_path)
+{
+    unsigned char* data { &camera_view.data()[0] };
+    stbi_write_jpg(image_path, image_width, image_height, 3, data, 100);
 }
 
 // Returns the Hamilton (quaternionic) product of u with v.

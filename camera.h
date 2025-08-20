@@ -16,14 +16,15 @@ public:
     double double_width;
     double double_height;
     // Horizontal FoV in degrees.
-    // TODO: Make the program assume that the FoV spans across the wider of either the width or height of the image.
+    // TODO: Make the program assume that the FoV spans across the wider of either the width or height of the camera view.
     double fov_width { 10. };
     double fov_width_rad;
     // Cartesian location of the camera.
     Vector3d camera_location;
     // Quaternion that determines the orientation of the camera, defined as a rotation from pointing along +x with zero angle.
     Vector4d camera_orientation { 1., 0., 0., 0. };
-    // Pixel array of the camera's view.
+    // Pixel array of the camera's view. This is stored as a 1D vector in row-major order
+    // from top-left to bottom-right. Every 3 bytes (3 entries) stores the RBG entries of a pixel.
     std::vector<unsigned char> camera_view;
 
     void setWidthHeight(int pixels_width, int pixels_height);
@@ -34,6 +35,10 @@ public:
     // Calculates the starting direction of the photon mapped to pixel x and pixel y.
     // x=0 and y=0 is the bottom left corner.
     Vector3d calculateStartDirection(int x, int y);
+    // Traces the actual image.
+    void traceImage();
+    // Output the pixel array of the camera's view to an image file.
+    void writeCameraImage(char* image_path);
 
 private:
     double pi = 3.141592653589793;
