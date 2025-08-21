@@ -96,7 +96,7 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
 
 // Image path should lead to a 2:1 aspect ratio, equirectangular-projected, panoramic image.
 // TODO: currently no check that the image is indeed 2:1 or anything to crop the image when it isn't.
-void World::readSkyMap(char* image_path)
+void World::importSkyMap(char* image_path)
 {
     // image_path should be a pointer to a C-style array of char[].
     // This is often too large for stack allocation, so stbi_load() returns a pointer to the array on the heap.
@@ -106,10 +106,13 @@ void World::readSkyMap(char* image_path)
     {
         // Store in a std::vector to let C++ handle memory management.
         sky_map = std::vector<unsigned char>(sky_map_pointer, sky_map_pointer + sky_width*sky_height*byte_depth);
+        phi_interval = (2.*pi) / sky_width;
+        theta_interval = pi / sky_height;
     }
     else
     {
         std::cout << "Image failed to load." << "\n";
+        exit(-1);
     }
     stbi_image_free(sky_map_pointer);
 }
@@ -120,9 +123,7 @@ unsigned char* World::readPixelFromSkyMap(int x, int y)
     if (x >= sky_width || y >= sky_height)
     {
         std::cout << "Warning: requested pixel: (" << x << ", " << y << ") is out of range." << "\n";
-        // Assign to a null pointer when invalid.
-        unsigned char* pixel { nullptr };
-        return pixel;
+        exit(-1);
     }
 
     // Gets the address of this particular pixel; use pixel[i] with i=0, 1, 2 for R, G, B.

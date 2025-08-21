@@ -1,9 +1,13 @@
 #include "camera.h"
+#include "world.h"
+#include "particle.h"
+#include <iostream>
 #include <cmath>
 #include <vector>
 #include <Eigen/Dense>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
+#include <omp.h>
 
 using namespace Eigen;
 
@@ -22,10 +26,10 @@ void Camera::setFov(double fov)
 {
     fov_width = fov;
     // Convert to radians.
-    fov_width_rad = (fov_width/180.)*pi;
+    fov_width_rad = fov_width * (pi/180.);
 }
 
-void Camera::setCameraLocation(Vector3d location)
+void Camera::setCameraLocation(Vector4d location)
 {
     camera_location = location;
 }
@@ -37,32 +41,92 @@ void Camera::setCameraOrientation(Vector4d orientation)
 }
 
 // Calculates the starting direction of the photon mapped to pixel x and pixel y.
-// x=0 and y=0 are the bottom-left corner of the camera.
+// x=0 and y=0 are the top-left corner of the camera.
 Vector3d Camera::calculateStartDirection(int x, int y)
 {
     double conversion_factor { fov_width_rad/double_width };
-    double phi { (x-0.5*double_width)*conversion_factor };
+    double phi { -((x-0.5*double_width)*conversion_factor) };
     double theta { (y-0.5*double_height)*conversion_factor + 0.5*pi };
 
     // Convert to a Cartesian unit vector in (x, y, z).
     Vector3d start_direction;
-    start_direction(1) = sin(theta)*cos(phi);
-    start_direction(2) = sin(theta)*sin(phi);
-    start_direction(3) = cos(theta);
+    start_direction(0) = sin(theta)*cos(phi);
+    start_direction(1) = sin(theta)*sin(phi);
+    start_direction(2) = cos(theta);
     // Rotate to align with the camera orientation.
     return quaternionRotate(start_direction, camera_orientation);
     // From here, the Particle/Photon object this is sent to needs
     // to normalise the direction to a null 4-velocity.
 }
 
-void Camera::traceImage()
+// Renders the actual image.
+void Camera::traceImage(World &simulation)
 {
+    double conversion_factor { fov_width_rad/double_width };
     // Go through each ray.
-    for (int x { 0 }; x < image_width; x++)
+    #pragma omp parallel for
+    for (int y = 0; y < image_height; y++)
     {
-        for (int y { 0 }; y < image_height; y++)
+        for (int x = 0; x < image_width; x++)
         {
+            int pixel_index { 3*(y*image_width + x) };
+            double phi;
+            double theta;
+            Vector3d start_direction { calculateStartDirection(x, y) };
+            Particle photon;
+            photon.setX(camera_location);
+            photon.updateMetric(simulation.getMetricTensor(photon.x));
+            Vector4d initial_v { 0., 0., 0., 0. };
+            initial_v(seq(1, 3)) = start_direction;
+            photon.setV(initial_v);
+            photon.makeVNull();
 
+            double euclidean_radius { photon.getEuclideanDistance() };
+            bool consumed { false };
+            while (euclidean_radius < simulation.sky_map_distance)
+            {
+                if (euclidean_radius < 1.5)
+                {
+                    // Entered the photon sphere; photon is guaranteed to cross the event horizon.
+                    consumed = true;
+                    break;
+                }
+                photon.advance(simulation);
+                euclidean_radius = photon.getEuclideanDistance();
+            }
+
+            if (consumed == true)
+            {
+                // Photon entered the photon sphere if true (set pixel to black).
+                camera_view[pixel_index] = 0;
+                camera_view[pixel_index+1] = 0;
+                camera_view[pixel_index+2] = 0;
+            }
+            else
+            {
+                // Photon escaped; get a pixel from the skybox.
+                // Get phi in the range 0 < phi <= 2*pi (hence +pi).
+                if (signbit(photon.x(2)) == true)
+                {
+                    // y is negative.
+                    phi = -(acos(photon.x(1) / photon.x(seq(1, 2)).norm())) + 0.99*pi;
+                }
+                else
+                {
+                    // y is positive.
+                    phi = (acos(photon.x(1) / photon.x(seq(1, 2)).norm())) + 0.99*pi;
+                }
+                theta = acos(photon.x(3) / euclidean_radius);
+
+                // Convert to pixel locations on the sky map; floor the number.
+                int sky_x { (int)floor(phi/simulation.phi_interval) };
+                int sky_y { (int)floor(theta/simulation.theta_interval) };
+                // Get pixel colour.
+                unsigned char* colour { simulation.readPixelFromSkyMap(sky_x, sky_y) };
+                camera_view[pixel_index] = colour[0];
+                camera_view[pixel_index+1] = colour[1];
+                camera_view[pixel_index+2] = colour[2];
+            }
         }
     }
 }
@@ -70,6 +134,7 @@ void Camera::traceImage()
 // Output the pixel array of the camera's view to an image file.
 void Camera::writeCameraImage(char* image_path)
 {
+    // stbi_write needs a pointer to the first element of the pixel array.
     unsigned char* data { &camera_view.data()[0] };
     stbi_write_jpg(image_path, image_width, image_height, 3, data, 100);
 }

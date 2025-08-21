@@ -32,6 +32,8 @@ void Particle::makeVNull()
     double b { 2.*metric(seq(1, 3), 0).dot(spatial_v) };
     Matrix3d spatial_metric { metric(seq(1, 3), seq(1, 3)) };
     double c { spatial_v.dot(spatial_metric*spatial_v) };
+    // Want the solution going backwards in time since we are tracing in reverse.
+    // Doesn't actually matter whether you choose + or -.
     v(0) = (-b - sqrt(b*b - 4.*a*c)) / (2.*a);
     normaliseV();
 }
@@ -148,7 +150,7 @@ double Particle::calculateParameterStep()
         // Exactly the Minkowski metric.
         return maxParameterStep;
     }
-    double step { 2e-2 * (3./deviation) };
+    double step { 2e-2 * pow(3./deviation, 1.5) };
     if (step < maxParameterStep)
     {
         return step;
@@ -165,7 +167,7 @@ double Particle::calculateParameterStep()
 // background skysphere/sky map).
 double Particle::getEuclideanDistance()
 {
-    return sqrt(x(seq(1, 3)).dot(x(seq(1, 3))));
+    return x(seq(1, 3)).norm();
 }
 
 // Returns the derivative of the given 4-velocity using the provided Christoffel symbols.

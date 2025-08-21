@@ -1,6 +1,7 @@
 #ifndef CAMERA
 #define CAMERA
 
+#include "world.h"
 #include <vector>
 #include <Eigen/Dense>
 
@@ -17,10 +18,10 @@ public:
     double double_height;
     // Horizontal FoV in degrees.
     // TODO: Make the program assume that the FoV spans across the wider of either the width or height of the camera view.
-    double fov_width { 10. };
+    double fov_width;
     double fov_width_rad;
-    // Cartesian location of the camera.
-    Vector3d camera_location;
+    // Cartesian spacetime location of the camera.
+    Vector4d camera_location;
     // Quaternion that determines the orientation of the camera, defined as a rotation from pointing along +x with zero angle.
     Vector4d camera_orientation { 1., 0., 0., 0. };
     // Pixel array of the camera's view. This is stored as a 1D vector in row-major order
@@ -29,14 +30,15 @@ public:
 
     void setWidthHeight(int pixels_width, int pixels_height);
     void setFov(double fov);
-    void setCameraLocation(Vector3d location);
+    // Note that sets the location in 4D spacetime.
+    void setCameraLocation(Vector4d location);
     void setCameraOrientation(Vector4d orientation);
 
     // Calculates the starting direction of the photon mapped to pixel x and pixel y.
     // x=0 and y=0 is the bottom left corner.
     Vector3d calculateStartDirection(int x, int y);
-    // Traces the actual image.
-    void traceImage();
+    // Renders the actual image.
+    void traceImage(World &simulation);
     // Output the pixel array of the camera's view to an image file.
     void writeCameraImage(char* image_path);
 

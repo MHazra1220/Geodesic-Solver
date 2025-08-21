@@ -23,7 +23,7 @@ public:
     // Metric tensor at the particle's coordinates, assumed to be symmetric (torsion-free).
     Matrix4d metric;
     // dl, the parameter step, will never be larger than this.
-    double maxParameterStep { 4. };
+    double maxParameterStep { 3. };
 
     void setX(Vector4d new_x);
     void setV(Vector4d new_v);
