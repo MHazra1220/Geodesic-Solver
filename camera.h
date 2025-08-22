@@ -43,7 +43,8 @@ public:
     void writeCameraImage(char* image_path);
 
 private:
-    double pi = 3.141592653589793;
+    const double pi = 3.141592653589793;
+    const double two_pi = 2.*pi;
 };
 
 // Returns the Hamilton product of u with v.

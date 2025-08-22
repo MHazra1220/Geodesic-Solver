@@ -64,7 +64,7 @@ void Camera::traceImage(World &simulation)
 {
     double conversion_factor { fov_width_rad/double_width };
     // Go through each ray.
-    #pragma omp parallel for
+    #pragma omp parallel for num_threads(26)
     for (int y = 0; y < image_height; y++)
     {
         for (int x = 0; x < image_width; x++)
@@ -109,17 +109,19 @@ void Camera::traceImage(World &simulation)
                 if (signbit(photon.x(2)) == true)
                 {
                     // y is negative.
-                    phi = -(acos(photon.x(1) / photon.x(seq(1, 2)).norm())) + 0.99*pi;
+                    phi = -(acos(photon.x(1) / photon.x(seq(1, 2)).norm())) + 0.9999*pi;
                 }
                 else
                 {
                     // y is positive.
-                    phi = (acos(photon.x(1) / photon.x(seq(1, 2)).norm())) + 0.99*pi;
+                    phi = (acos(photon.x(1) / photon.x(seq(1, 2)).norm())) + 0.9999*pi;
                 }
                 theta = acos(photon.x(3) / euclidean_radius);
 
                 // Convert to pixel locations on the sky map; floor the number.
-                int sky_x { (int)floor(phi/simulation.phi_interval) };
+                // Because phi goes anticlockwise, 2.*pi - phi is needed here to
+                // stop images being reversed along phi.
+                int sky_x { (int)floor((two_pi - phi)/simulation.phi_interval) };
                 int sky_y { (int)floor(theta/simulation.theta_interval) };
                 // Get pixel colour.
                 unsigned char* colour { simulation.readPixelFromSkyMap(sky_x, sky_y) };

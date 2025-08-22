@@ -42,7 +42,7 @@ public:
 private:
     // Pointer to the pixel array of the sky map.
     unsigned char* sky_map_pointer { nullptr };
-    double pi = 3.141592653589793;
+    const double pi = 3.141592653589793;
 };
 
 #endif
