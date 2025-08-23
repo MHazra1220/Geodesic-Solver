@@ -81,18 +81,18 @@ void Camera::traceImage(World &simulation)
             photon.setV(initial_v);
             photon.makeVNull();
 
-            double euclidean_radius { photon.getEuclideanDistance() };
+            double squared_radius { photon.x(seq(1, 3)).squaredNorm() };
             bool consumed { false };
-            while (euclidean_radius < simulation.sky_map_distance)
+            while (squared_radius < simulation.sky_map_distance_squared)
             {
-                if (euclidean_radius < 1.5)
+                if (squared_radius < 2.25)
                 {
                     // Entered the photon sphere; photon is guaranteed to cross the event horizon.
                     consumed = true;
                     break;
                 }
                 photon.advance(simulation);
-                euclidean_radius = photon.getEuclideanDistance();
+                squared_radius = photon.x(seq(1, 3)).squaredNorm();
             }
 
             if (consumed == true)
@@ -111,7 +111,7 @@ void Camera::traceImage(World &simulation)
                     // Get into the range 0 to 2pi.
                     phi += two_pi;
                 }
-                theta = acos(photon.x(3) / euclidean_radius);
+                theta = acos(photon.x(3) / photon.getEuclideanDistance());
 
                 // Convert to pixel locations on the sky map; floor the number.
                 // Because phi goes anticlockwise, 2.*pi - phi is needed here to
@@ -128,10 +128,10 @@ void Camera::traceImage(World &simulation)
                     sky_y = simulation.sky_height - 1;
                 }
                 // Get pixel colour.
-                unsigned char* colour { simulation.readPixelFromSkyMap(sky_x, sky_y) };
-                camera_view[pixel_index] = colour[0];
-                camera_view[pixel_index+1] = colour[1];
-                camera_view[pixel_index+2] = colour[2];
+                photon.pixelColour = simulation.readPixelFromSkyMap(sky_x, sky_y);
+                camera_view[pixel_index] = photon.pixelColour[0];
+                camera_view[pixel_index+1] = photon.pixelColour[1];
+                camera_view[pixel_index+2] = photon.pixelColour[2];
             }
         }
     }
@@ -141,7 +141,7 @@ void Camera::traceImage(World &simulation)
 void Camera::writeCameraImage(char* image_path)
 {
     // stbi_write needs a pointer to the first element of the pixel array.
-    unsigned char* data { &camera_view.data()[0] };
+    unsigned char* data { &camera_view[0] };
     stbi_write_jpg(image_path, image_width, image_height, 3, data, 100);
 }
 

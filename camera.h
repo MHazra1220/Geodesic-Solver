@@ -45,6 +45,8 @@ public:
 private:
     const double pi = 3.141592653589793;
     const double two_pi = 2.*pi;
+
+    unsigned char* RGBToHSV(unsigned char colour[]);
 };
 
 // Returns the Hamilton product of u with v.

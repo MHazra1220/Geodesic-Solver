@@ -37,8 +37,9 @@ Matrix4d World::getMetricTensor(Vector4d x)
     return metric;
 }
 
-// TODO: Consider writing a Hamiltonian raytracer that doesn't require the Christoffel symbols (but does require multiple matrix inversions).
-void World::getChristoffelSymbols(Vector4d x, Matrix4d &metric, Matrix4d christoffel_symbols[])
+// Calculates the Christoffel symbols at x using central difference numerical derivatives.
+// Overwrites the array of 4 Eigen::Matrix4d objects, one for each coordinate of the upper index.
+void World::getChristoffelSymbols(Vector4d x, Matrix4d &metric, Matrix4d christoffel_symbols[4])
 {
     // Assumed default step in each coordinate.
     // TODO: How do you define this adaptively to not break near areas of extreme distortion?

@@ -23,10 +23,12 @@ public:
     // Metric tensor at the particle's coordinates, assumed to be symmetric (torsion-free).
     Matrix4d metric;
     // Christoffel symbols at the particle's coordinates. These are only used when calculating acceleration
-    // and are repeatedly overwritten; they are never needed elsewhere.
+    // and are repeatedly overwritten to avoid allocating and copying; they are never needed elsewhere.
+    // One matrix for each coordinate (upper index).
     Matrix4d christoffel_symbols[4] {};
     // dl, the parameter step, will never be larger than this.
     double maxParameterStep { 8. };
+    unsigned char* pixelColour { nullptr };
 
     void setX(Vector4d new_x);
     void setV(Vector4d new_v);

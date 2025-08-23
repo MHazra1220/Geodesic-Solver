@@ -14,7 +14,7 @@ int main()
     char* ref { file };
     world_test.importSkyMap(ref);
     Camera camera_test;
-    camera_test.setWidthHeight(1920, 1080);
+    camera_test.setWidthHeight(2560, 1440);
     camera_test.setFov(90.);
     camera_test.setCameraLocation(Vector4d { 0., 20., 0., 0. });
     // Point along +x (No change in orientation required).
