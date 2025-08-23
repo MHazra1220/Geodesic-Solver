@@ -150,7 +150,7 @@ double Particle::calculateParameterStep()
         // Exactly the Minkowski metric.
         return maxParameterStep;
     }
-    double step { 2e-2 * pow(3./deviation, 1.5) };
+    double step { 1e-1 * pow(3./deviation, 2.) };
     if (step < maxParameterStep)
     {
         return step;

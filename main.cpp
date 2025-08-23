@@ -20,7 +20,7 @@ int main()
     // Point along +x (No change in orientation required).
     camera_test.setCameraOrientation(Vector4d { 0., 0., 0., 1. });
     camera_test.traceImage(world_test);
-    char output_image[] { "/media/mh2001/SSD2/Programming/General Relativity/Geodesic_Solver/output_images/test_4.jpg" };
+    char output_image[] { "/media/mh2001/SSD2/Programming/General Relativity/Geodesic_Solver/output_images/test_2.jpg" };
     char* output_image_ref { output_image };
     camera_test.writeCameraImage(output_image_ref);
 
