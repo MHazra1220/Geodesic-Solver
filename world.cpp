@@ -58,11 +58,14 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
     Vector4d intermediate_x { x };
     for (int mu { 0 }; mu < 4; mu++)
     {
+        // WARNING: Euler is significantly faster than central difference; just use a very small step and it'll be okay.
+        // The limiting factor in accuracy is the overarching parameter step in the geodesic equation, not the metric derivatives.
         intermediate_x(mu) += step;
         metric_forward = getMetricTensor(intermediate_x);
-        intermediate_x(mu) -= 2.*step;
-        metric_backward = getMetricTensor(intermediate_x);
-        metric_derivs[mu] = (metric_forward - metric_backward) / (2.*step);
+        // intermediate_x(mu) -= 2.*step;
+        // metric_backward = getMetricTensor(intermediate_x);
+        // metric_derivs[mu] = (metric_forward - metric_backward) / (2.*step);
+        metric_derivs[mu] = (metric_forward - metric) / step;
         intermediate_x(mu) = x(mu);
     }
 
