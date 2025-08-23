@@ -64,7 +64,7 @@ void Camera::traceImage(World &simulation)
 {
     double conversion_factor { fov_width_rad/double_width };
     // Go through each ray.
-    #pragma omp parallel for num_threads(26)
+    #pragma omp parallel for
     for (int y = 0; y < image_height; y++)
     {
         for (int x = 0; x < image_width; x++)
@@ -105,24 +105,28 @@ void Camera::traceImage(World &simulation)
             else
             {
                 // Photon escaped; get a pixel from the skybox.
-                // Get phi in the range 0 < phi <= 2*pi (hence +pi).
-                if (signbit(photon.x(2)) == true)
+                phi = atan2(photon.x(2), photon.x(1));
+                if (phi < 0)
                 {
-                    // y is negative.
-                    phi = -(acos(photon.x(1) / photon.x(seq(1, 2)).norm())) + 0.9999*pi;
-                }
-                else
-                {
-                    // y is positive.
-                    phi = (acos(photon.x(1) / photon.x(seq(1, 2)).norm())) + 0.9999*pi;
+                    // Get into the range 0 to 2pi.
+                    phi += two_pi;
                 }
                 theta = acos(photon.x(3) / euclidean_radius);
 
                 // Convert to pixel locations on the sky map; floor the number.
                 // Because phi goes anticlockwise, 2.*pi - phi is needed here to
                 // stop images being reversed along phi.
-                int sky_x { (int)floor((two_pi - phi)/simulation.phi_interval) };
+                int sky_x { (int)floor((two_pi-phi)/simulation.phi_interval) };
                 int sky_y { (int)floor(theta/simulation.theta_interval) };
+                // These if statements stop errors when the ray is exactly along the +x or +z axis.
+                if (sky_x >= simulation.sky_width)
+                {
+                    sky_x = simulation.sky_width - 1;
+                }
+                if (sky_y >= simulation.sky_height)
+                {
+                    sky_y = simulation.sky_height - 1;
+                }
                 // Get pixel colour.
                 unsigned char* colour { simulation.readPixelFromSkyMap(sky_x, sky_y) };
                 camera_view[pixel_index] = colour[0];

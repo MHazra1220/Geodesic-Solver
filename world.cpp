@@ -128,6 +128,6 @@ unsigned char* World::readPixelFromSkyMap(int x, int y)
 
     // Gets the address of this particular pixel; use pixel[i] with i=0, 1, 2 for R, G, B.
     // Note that this is not returned as int! Use static_cast<int>() if necessary.
-    unsigned char* pixel { &sky_map[(y*sky_height + x)*byte_depth] };
+    unsigned char* pixel { &sky_map[(y*sky_width + x)*byte_depth] };
     return pixel;
 }
