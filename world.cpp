@@ -1,7 +1,6 @@
 #include "world.h"
 #include <iostream>
 #include <cmath>
-#include <vector>
 #include <Eigen/Dense>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -38,14 +37,9 @@ Matrix4d World::getMetricTensor(Vector4d x)
     return metric;
 }
 
-// TODO: Consider using GiNaC to do this symbolically (though I doubt this will be beneficial for complicated metrics).
 // TODO: Consider writing a Hamiltonian raytracer that doesn't require the Christoffel symbols (but does require multiple matrix inversions).
-std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
+void World::getChristoffelSymbols(Vector4d x, Matrix4d &metric, Matrix4d christoffel_symbols[])
 {
-    // The metric at x is also passed in because it should already be present in whatever particle this
-    // is being used for.
-    // Each entry corresponds to a coordinate of the upper index of the Christoffel symbols.
-    std::vector<Matrix4d> christoffel_symbols (4);
     // Assumed default step in each coordinate.
     // TODO: How do you define this adaptively to not break near areas of extreme distortion?
     // For now, just set it to a small number.
@@ -58,13 +52,10 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
     Vector4d intermediate_x { x };
     for (int mu { 0 }; mu < 4; mu++)
     {
-        // WARNING: Euler is significantly faster than central difference; just use a very small step and it'll be okay.
+        // WARNING: Euler can be significantly faster than central difference; just use a very small step and it'll be okay.
         // The limiting factor in accuracy is the overarching parameter step in the geodesic equation, not the metric derivatives.
         intermediate_x(mu) += step;
         metric_forward = getMetricTensor(intermediate_x);
-        // intermediate_x(mu) -= 2.*step;
-        // metric_backward = getMetricTensor(intermediate_x);
-        // metric_derivs[mu] = (metric_forward - metric_backward) / (2.*step);
         metric_derivs[mu] = (metric_forward - metric) / step;
         intermediate_x(mu) = x(mu);
     }
@@ -93,8 +84,6 @@ std::vector<Matrix4d> World::getChristoffelSymbols(Vector4d x, Matrix4d &metric)
         }
         christoffel_symbols[alpha] = christoffel_component;
     }
-
-    return christoffel_symbols;
 }
 
 // Image path should lead to a 2:1 aspect ratio, equirectangular-projected, panoramic image.

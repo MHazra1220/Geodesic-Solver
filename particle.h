@@ -22,6 +22,9 @@ public:
     Vector4d v;
     // Metric tensor at the particle's coordinates, assumed to be symmetric (torsion-free).
     Matrix4d metric;
+    // Christoffel symbols at the particle's coordinates. These are only used when calculating acceleration
+    // and are repeatedly overwritten; they are never needed elsewhere.
+    Matrix4d christoffel_symbols[4] {};
     // dl, the parameter step, will never be larger than this.
     double maxParameterStep { 8. };
 
@@ -45,7 +48,7 @@ public:
     double getEuclideanDistance();
 };
 
-// Return the parameter derivative of the given 4-velocity under the provided Christoffel symbols.
-Vector4d v_derivative(Vector4d v, std::vector<Matrix4d> &christoffel_symbols);
+// Return the parameter derivative of the given 4-velocity under the current Christoffel symbols.
+Vector4d v_derivative(Vector4d v, Matrix4d christoffel_symbols[]);
 
 #endif

@@ -75,10 +75,8 @@ void Particle::advance(World &simulation)
     Vector4d temp_v;
     Matrix4d temp_metric;
 
-    std::vector<Matrix4d> christoffel_symbols;
-
     // Calculate k_1.
-    christoffel_symbols = simulation.getChristoffelSymbols(x, metric);
+    simulation.getChristoffelSymbols(x, metric, christoffel_symbols);
     k_n_x = v;
     k_n_v = v_derivative(v, christoffel_symbols);
     x_step += k_n_x;
@@ -92,7 +90,7 @@ void Particle::advance(World &simulation)
         temp_x = x + 0.5*dl*k_n_minus_1_x;
         temp_v = v + 0.5*dl*k_n_minus_1_v;
         temp_metric = simulation.getMetricTensor(temp_x);
-        christoffel_symbols = simulation.getChristoffelSymbols(temp_x, temp_metric);
+        simulation.getChristoffelSymbols(temp_x, temp_metric, christoffel_symbols);
         k_n_x = v + 0.5*dl*k_n_minus_1_v;
         k_n_v = v_derivative(temp_v, christoffel_symbols);
         x_step += 2.*k_n_x;
@@ -105,7 +103,7 @@ void Particle::advance(World &simulation)
     temp_x = x + dl*k_n_minus_1_x;
     temp_v = v + dl*k_n_minus_1_v;
     temp_metric = simulation.getMetricTensor(temp_x);
-    christoffel_symbols = simulation.getChristoffelSymbols(temp_x, temp_metric);
+    simulation.getChristoffelSymbols(temp_x, temp_metric, christoffel_symbols);
     k_n_x = v + dl*k_n_minus_1_v;
     k_n_v = v_derivative(temp_v, christoffel_symbols);
     x_step += k_n_x;
@@ -170,8 +168,8 @@ double Particle::getEuclideanDistance()
     return x(seq(1, 3)).norm();
 }
 
-// Returns the derivative of the given 4-velocity using the provided Christoffel symbols.
-Vector4d v_derivative(Vector4d v, std::vector<Matrix4d> &christoffel_symbols)
+// Returns the derivative of the given 4-velocity using the current Christoffel symbols.
+Vector4d v_derivative(Vector4d v, Matrix4d christoffel_symbols[])
 {
     Vector4d acceleration;
     for (int mu { 0 }; mu < 4; mu++)

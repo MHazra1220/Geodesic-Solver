@@ -32,7 +32,7 @@ public:
     Matrix4d getMetricTensor(Vector4d x);
     // Calculates the Christoffel symbols at x using central difference numerical derivatives.
     // Returns an array of 4 Eigen::Matrix4d objects, one for each coordinate of the upper index.
-    std::vector<Matrix4d> getChristoffelSymbols(Vector4d x, Matrix4d &metric);
+    void getChristoffelSymbols(Vector4d x, Matrix4d &metric, Matrix4d christoffel_symbols[]);
     // Reads in a bitmap as a spherical sky map in equirectangular projection.
     // Assumed for now to be a bitmap with 2:1 aspect ratio.
     void importSkyMap(char* image_path);
