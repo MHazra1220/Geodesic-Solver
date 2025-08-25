@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <array>
+#include <vector>
 #include <Eigen/Dense>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
