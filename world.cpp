@@ -1,6 +1,7 @@
 #include "world.h"
 #include <iostream>
 #include <cmath>
+#include <array>
 #include <Eigen/Dense>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -47,7 +48,7 @@ void World::getChristoffelSymbols(Vector4d x, Matrix4d &metric, Matrix4d christo
     double step { 1e-4 };
 
     // Second-order accurate central-difference derivatives of the metric along each component.
-    std::vector<Matrix4d> metric_derivs (4);
+    std::array<Matrix4d, 4> metric_derivs;
     Matrix4d metric_forward;
     Matrix4d metric_backward;
     Vector4d intermediate_x { x };

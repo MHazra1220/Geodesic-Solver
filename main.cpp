@@ -2,7 +2,6 @@
 #include "particle.h"
 #include "camera.h"
 #include <iostream>
-#include <string>
 #include <Eigen/Dense>
 
 using namespace Eigen;
@@ -25,4 +24,6 @@ int main()
     camera_test.writeCameraImage(output_image_ref);
 
     return 0;
+
+
 }
