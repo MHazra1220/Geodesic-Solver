@@ -26,7 +26,7 @@ public:
     int byte_depth { 0 };
     // Use a vector in practice to let C++ manage its memory properly.
     std::vector<unsigned char> sky_map;
-    const double sky_map_distance { 150. };
+    const double sky_map_distance { 50. };
     const double sky_map_distance_squared { sky_map_distance*sky_map_distance };
 
     // Calculates the metric tensor at x.

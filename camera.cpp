@@ -105,13 +105,13 @@ void Camera::traceImage(World &simulation)
             else
             {
                 // Photon escaped; get a pixel from the skybox.
-                phi = atan2(photon.x(2), photon.x(1));
+                phi = atan2(photon.v(2), photon.v(1));
                 if (phi < 0)
                 {
                     // Get into the range 0 to 2pi.
                     phi += two_pi;
                 }
-                theta = acos(photon.x(3) / photon.getEuclideanDistance());
+                theta = acos(photon.v(3) / photon.v(seq(1, 3)).norm());
 
                 // Convert to pixel locations on the sky map; floor the number.
                 // Because phi goes anticlockwise, 2.*pi - phi is needed here to
