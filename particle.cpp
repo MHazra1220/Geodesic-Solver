@@ -33,7 +33,7 @@ void Particle::makeVNull()
     Matrix3d spatial_metric { metric(seq(1, 3), seq(1, 3)) };
     double c { spatial_v.dot(spatial_metric*spatial_v) };
     // Want the solution going backwards in time since we are tracing in reverse.
-    // Doesn't actually matter whether you choose + or -.
+    // Doesn't actually matter whether you choose + or - for a static metric.
     v(0) = (-b - sqrt(b*b - 4.*a*c)) / (2.*a);
     normaliseV();
 }
