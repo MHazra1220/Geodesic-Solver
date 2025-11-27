@@ -17,7 +17,7 @@ void Particle::setV(Vector4d new_v)
 
 /*
  * Modifies the t-component of the 4-velocity to make the vector null.
- * R equires v and the* metric at the current coordinates to be defined.
+ * Requires v and the metric at the current coordinates to be defined.
  * This requires solving a quadratic equation for the t-component; assume
  * that you should take the more positive component because g_00 is
  * probably negative. Note that both solutions are negative in a black hole.

@@ -104,7 +104,7 @@ void Camera::traceImage(World &simulation)
             }
             else
             {
-                // Photon escaped; get a pixel from the skybox.
+                // Photon escaped; get a pixel from the skybox by extending the ray to infinity along the current velocity.
                 phi = atan2(photon.v(2), photon.v(1));
                 if (phi < 0)
                 {
